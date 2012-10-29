@@ -11,6 +11,7 @@
 #include <sstream>
 #include <fstream>
 #include <time.h>
+#include <vector>
 #include "Control.h"
 #include "Network.h"
 #include "Textfield.h"
