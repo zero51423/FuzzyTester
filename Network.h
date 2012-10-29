@@ -2,25 +2,28 @@
 #define NETWORK_H_INCLUDED
 
 #include <sys/select.h>
+#include <string>
+
+using namespace std;
 
 class Network {
 
     public:
 
         // Public constructor
-		Network(std::string ipAddress);
+	Network(string ipAddress);
 
         // Public destructor
         ~Network();
 
         // Public methods
-        bool get_query(std::string page);        // Perform a GET request
-        bool post_query(std::string page);       // Perform a POST request
+        bool get_query(string page);        // Perform a GET request
+        bool post_query(string page);       // Perform a POST request
 
     private:
 
         // Private data members
-		std::string myIpAddress;                 // Host IP address
+	string myIpAddress;                 // Host IP address
         struct sockaddr_in *remote;
         struct timeval tv;
         int sock;

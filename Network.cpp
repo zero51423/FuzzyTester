@@ -20,6 +20,7 @@ using namespace std;
 #define USERAGENT "HTMLGET 1.1"
 #define CONTENT_TYPE "application/x-www-form-urlencoded"
 #define TIMEOUT 5
+#define XML_START "<?xml"
 
 // Pre: Any IPv4 address
 // Post: Establishes a TCP connection to the host IPv4 address specififed
@@ -103,11 +104,19 @@ bool Network::get_query(string page) {
         recv(sock, buffer, BUFFER_SIZE, 0);
     }
 
-    // Write response to file
-    ofstream myfile;
-    myfile.open(FILE_LOC);
-    myfile << buffer;
-    myfile.close();
+    string response(buffer);
+    int xmlLoc = response.find(XML_START);
+    if (xmlLoc == string::npos) {
+        //error
+        exit(1);
+    }
+    else {
+        // Write response to file
+        ofstream myfile;
+        myfile.open(FILE_LOC);
+        myfile << response.substr(xmlLoc, response.length() - xmlLoc);
+        myfile.close();
+    }
 
     return true;
 }
@@ -149,11 +158,19 @@ bool Network::post_query(string page) {
         recv(sock, buffer, BUFFER_SIZE, 0);
     }
 
-    // Write response to file
-    ofstream myfile;
-    myfile.open(FILE_LOC);
-    myfile << buffer;
-    myfile.close ();
+    string response(buffer);
+    int xmlLoc = response.find(XML_START);
+    if (xmlLoc == string::npos) {
+        //error
+        exit(1);
+    }
+    else {
+        // Write response to file
+        ofstream myfile;
+        myfile.open(FILE_LOC);
+        myfile << response.substr(xmlLoc, response.length() - xmlLoc);
+        myfile.close();
+    }
 
     return true;
 }

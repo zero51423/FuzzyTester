@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   Tester.cpp
  * Author: Josh Estus, Cory Fowler, Alex Williams
  *
@@ -12,6 +12,9 @@
 #include <fstream>
 #include <time.h>
 #include <vector>
+
+using namespace std;
+
 #include "Control.h"
 #include "Network.h"
 #include "TextField.h"
@@ -19,22 +22,22 @@
 #include "pugixml.hpp"
 #include "globals.h"
 
-using namespace std;
+vector <Control*> controls;
 //Prototypes
 
 /*Pre: Send valid vector of controls. Will pick one of the vector indexes
- * that control will be the index of the control to choose. 
- * 
+ * that control will be the index of the control to choose.
+ *
  * Post: Returns the index in the vector of which control to activate
  */
-int select_control(vector <Control*> &controls) {
+int select_control() {
     srand(time(NULL)); //random seed
     return rand() % controls.size(); //getting a number between 0 and the amount of controls on the screen
 }
 
 /*Pre: noReponseCounter and responseRecieved will be used to update
  * the count of if the Simulation has crashed or not
- * Post: will return a count between 0 and 5 for the noResponseCounter. 
+ * Post: will return a count between 0 and 5 for the noResponseCounter.
  */
 int test_for_crash(int noResponseCounter, bool responseRecieved) {
     if (responseRecieved) {
@@ -46,10 +49,10 @@ int test_for_crash(int noResponseCounter, bool responseRecieved) {
 
 /*Pre: parseXML is given the vector of controls. parseXML is able to retrieve the fuzzypanel.xml
  *  correctly.
- * 
- *  Post: Fills control vector with all possible controls and returns 0 for success 1 for failure. 
+ *
+ *  Post: Fills control vector with all possible controls and returns 0 for success 1 for failure.
  */
-int parseXml(vector< Control* > &controls) {
+int parseXml() {
     //clear control list
     for (int i = 0; i < controls.size(); i++) {
         delete controls[i];
@@ -93,7 +96,7 @@ int parseXml(vector< Control* > &controls) {
 }
 
 /*
- * 
+ *
  */
 int main(int argc, char** argv) {
 
@@ -120,39 +123,41 @@ int main(int argc, char** argv) {
             output_on_no_crash = argv[i++];
         }
         if (arg == "-n") {
-            MAX_ACTIONS = argv[i++];
+            MAX_ACTIONS = atoi(argv[i++]);
         }
         if (arg == "-s") {
             ipaddr = argv[i++];
         }
     }
-    vector <Control> controls;
+
+    Network *localNetwork = new Network(ipaddr);
+
     int noResponseCounter = 0, choice = -1; //choice is the index of the control option to select. noResponseCounter is used to count possible crashes/hangs
     ofstream outputFile(logFileName.c_str());
     for (int actionsMade = 0; actionsMade < MAX_ACTIONS; actionsMade++) {
-        if (!Network.get_query("/webservices/automation/data/panel.xml")) { //calls Network get_query to get the XML page
+        if (!localNetwork->get_query("/webservices/automation/data/panel.xml")) { //calls Network get_query to get the XML page
             crashFlag = true;
             break;
         }
-        int corParse = 1; //assume the parse has failed. 
-        corParse = parseXml(controls); //returns 0 if correctly parses, 1 is failed
+        int corParse = 1; //assume the parse has failed.
+        corParse = parseXml(); //returns 0 if correctly parses, 1 is failed
         if (corParse == 1) {
-            /* For loop used to double check and make sure it wasn't just a messup. 
-             * Could potentially move later          
+            /* For loop used to double check and make sure it wasn't just a messup.
+             * Could potentially move later
              */
             for (int i = 0; i < 5; i++) {
-                corParse = parseXml(controls);
+                corParse = parseXml();
                 if (corParse == 0) { //page is loaded and parsed correctly
                     break;
                 }
             }
         }
 
-        choice = select_control(controls);
-        string activateString = controls[choice].getActivateString();
-        bool responseReceived = Network.get_query(activateString);
+        choice = select_control();
+        string activateString = controls[choice]->getActivateString();
+        bool responseReceived = localNetwork->get_query(activateString);
         if (usingStdOut) {
-            cout << actionsMade << " " << controls[choice].getname() << " " << activateString << " ";
+            cout << actionsMade << " " << controls[choice]->getname() << " " << activateString << " ";
             if (responseReceived) {
                 cout << "True\n";
             } else {
@@ -160,7 +165,7 @@ int main(int argc, char** argv) {
             }
         } else //if not using stdOut
         {
-            outputFile << actionsMade << " " << controls[choice].getname() << " " << activateString << " ";
+            outputFile << actionsMade << " " << controls[choice]->getname() << " " << activateString << " ";
             if (responseReceived) {
                 outputFile << "True\n";
             } else {
