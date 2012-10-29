@@ -8,19 +8,19 @@ class Network {
     public:
 
         // Public constructor
-        Network(string ipAddress);
+		Network(std::string ipAddress);
 
         // Public destructor
         ~Network();
 
         // Public methods
-        bool get_query(string page);        // Perform a GET request
-        bool post_query(string page);       // Perform a POST request
+        bool get_query(std::string page);        // Perform a GET request
+        bool post_query(std::string page);       // Perform a POST request
 
     private:
 
         // Private data members
-        string myIpAddress;                 // Host IP address
+		std::string myIpAddress;                 // Host IP address
         struct sockaddr_in *remote;
         struct timeval tv;
         int sock;

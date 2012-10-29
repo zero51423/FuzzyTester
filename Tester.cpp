@@ -14,7 +14,7 @@
 #include <vector>
 #include "Control.h"
 #include "Network.h"
-#include "Textfield.h"
+#include "TextField.h"
 #include "Button.h"
 #include "pugixml.hpp"
 #include "globals.h"
