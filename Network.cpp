@@ -8,6 +8,8 @@
 #include <iostream>
 #include <string>
 
+#include "globals.h"
+
 using namespace std;
 
 #include "Network.h"
@@ -17,7 +19,6 @@ using namespace std;
 #define BUFFER_SIZE 40960
 #define USERAGENT "HTMLGET 1.1"
 #define CONTENT_TYPE "application/x-www-form-urlencoded"
-#define FILE_LOC "file.xml"
 #define TIMEOUT 5
 
 // Pre: Any IPv4 address

@@ -17,8 +17,7 @@
 #include "Textfield.h"
 #include "Button.h"
 #include "pugixml.hpp"
-
-#define FILE_LOC "fuzzyPanel.xml"
+#include "globals.h"
 
 using namespace std;
 //Prototypes
