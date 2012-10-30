@@ -1,9 +1,12 @@
+// Test git commit
+
 #include <stdio.h>
 #include <sys/time.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <stdlib.h>
 #include <netdb.h>
+#include <cstring>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -16,7 +19,7 @@ using namespace std;
 
 #define PAGE "/"
 #define PORT 80
-#define BUFFER_SIZE 40960
+#define BUFFER_SIZE 4096000
 #define USERAGENT "HTMLGET 1.1"
 #define CONTENT_TYPE "application/x-www-form-urlencoded"
 #define TIMEOUT 5
@@ -101,7 +104,28 @@ bool Network::get_query(string page) {
         //error("Timeout occured");
         return false;
     } else {
-        recv(sock, buffer, BUFFER_SIZE, 0);
+        ofstream myfile;
+        remove(FILE_LOC);
+        myfile.open(FILE_LOC, ios::app);
+        int xmlStart = 0;
+        char *xmlContent;
+        int rec;
+        while ((rec = recv(sock, buffer, BUFFER_SIZE, 0)) > 0) {
+            cout << rec << endl;
+            if (xmlStart == 0) {
+                xmlContent = strstr(buffer, "\r\n\r\n");
+                if (xmlContent != NULL) {
+                    xmlStart = 1;
+                    xmlContent += 4;
+                }
+            } else {
+                xmlContent = buffer;
+            }
+            myfile << xmlContent;
+            //fill(&buffer[0], &buffer[BUFFER_SIZE], 0);
+            memset(buffer, 0, rec);
+        }
+        myfile.close();
     }
 
     string response(buffer);
@@ -112,10 +136,10 @@ bool Network::get_query(string page) {
     }
     else {
         // Write response to file
-        ofstream myfile;
-        myfile.open(FILE_LOC);
-        myfile << response.substr(xmlLoc, response.length() - xmlLoc);
-        myfile.close();
+        //ofstream myfile;
+        //myfile.open(FILE_LOC);
+        //myfile << response.substr(xmlLoc, response.length() - xmlLoc);
+        //myfile.close();
     }
 
     return true;
@@ -155,7 +179,13 @@ bool Network::post_query(string page) {
         //error("Timeout occured");
         return false;
     } else {
-        recv(sock, buffer, BUFFER_SIZE, 0);
+        ofstream myfile;
+        myfile.open(FILE_LOC);
+        while (int rec = recv(sock, buffer, BUFFER_SIZE, 0)) {
+            //myfile <<buffer;
+            cout << buffer;
+        }
+        myfile.close();
     }
 
     string response(buffer);
@@ -166,10 +196,10 @@ bool Network::post_query(string page) {
     }
     else {
         // Write response to file
-        ofstream myfile;
-        myfile.open(FILE_LOC);
-        myfile << response.substr(xmlLoc, response.length() - xmlLoc);
-        myfile.close();
+        //ofstream myfile;
+        //myfile.open(FILE_LOC);
+        //myfile << response.substr(xmlLoc, response.length() - xmlLoc);
+        //myfile.close();
     }
 
     return true;

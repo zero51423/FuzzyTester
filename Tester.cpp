@@ -61,7 +61,7 @@ int parseXml() {
 
     //open XML document
     pugi::xml_document doc;
-    pugi::xml_parse_result result = doc.load_file(FILE_LOC);
+    pugi::xml_parse_result result = doc.load_file("file.xml");
 
     //return error if document fails to read
     if (!result) {
@@ -70,23 +70,26 @@ int parseXml() {
 
     } else {
         pugi::xml_node panel = doc.child("panel");
+        //cout << panel.attribute("viewname").value();
         for (pugi::xml_node object = panel.child("object"); object; object = object.next_sibling("object")) {
-            string name = object.attribute("name").value();
-            string objectType = object.attribute("type").value();
-            int x = object.attribute("x").as_int();
-            int y = object.attribute("y").as_int();
-            int width = object.attribute("width").as_int();
-            int height = object.attribute("height").as_int();
+            //cout << object.value();
+            string name = object.child_value("name");
+            string objectType = object.child_value("type");
+            //cout << objectType;
+            int x = atoi(object.child_value("x"));
+            int y = atoi(object.child_value("y"));
+            int width = atoi(object.child_value("width"));
+            int height = atoi(object.child_value("height"));
 
-            if (name == "button") {
+            if (objectType == "Button") {
                 controls.push_back(new Button(name, x, y, width, height));
 
-            } else if (name == "textField") {
+            } else if (objectType == "TextField") {
                 controls.push_back(new TextField(name, x, y, width, height));
 
             } else {
-                cerr << "ERROR: Bad control type present in XML" << endl;
-                return 1;
+                //cerr << "ERROR: Bad control type present in XML" << endl;
+                //return 1;
             }
         }
     }
@@ -130,15 +133,15 @@ int main(int argc, char** argv) {
         }
     }
 
-    Network *localNetwork = new Network(ipaddr);
+    Network *localNetwork = new Network("128.163.146.74");
 
     int noResponseCounter = 0, choice = -1; //choice is the index of the control option to select. noResponseCounter is used to count possible crashes/hangs
     ofstream outputFile(logFileName.c_str());
     for (int actionsMade = 0; actionsMade < MAX_ACTIONS; actionsMade++) {
-        if (!localNetwork->get_query("/webservices/automation/data/panel.xml")) { //calls Network get_query to get the XML page
-            crashFlag = true;
-            break;
-        }
+        //if (!localNetwork->get_query("/webservices/automation/data/panel.xml")) { //calls Network get_query to get the XML page
+          //  crashFlag = true;
+            //break;
+        //}
         int corParse = 1; //assume the parse has failed.
         corParse = parseXml(); //returns 0 if correctly parses, 1 is failed
         if (corParse == 1) {
@@ -155,6 +158,7 @@ int main(int argc, char** argv) {
 
         choice = select_control();
         string activateString = controls[choice]->getActivateString();
+        cout << activateString;
         bool responseReceived = localNetwork->get_query(activateString);
         if (usingStdOut) {
             cout << actionsMade << " " << controls[choice]->getname() << " " << activateString << " ";
